@@ -118,7 +118,7 @@
         </constraints>
         <properties>
           <horizontalAlignment value="0"/>
-          <text value="Release Date (DD/MM/YYYY)"/>
+          <text value="Release Date (YYYY)"/>
         </properties>
       </component>
       <component id="252e9" class="javax.swing.JTextField" binding="txtFldExpl5">
@@ -140,7 +140,7 @@
         </constraints>
         <properties>
           <horizontalAlignment value="0"/>
-          <text value="Free Text"/>
+          <text value="Scientific Field"/>
         </properties>
       </component>
       <scrollpane id="9f0b7">

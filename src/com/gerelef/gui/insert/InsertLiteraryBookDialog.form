@@ -123,7 +123,7 @@
         </constraints>
         <properties>
           <horizontalAlignment value="0"/>
-          <text value="Release Date (DD/MM/YYYY)"/>
+          <text value="Release Date (YYYY)"/>
         </properties>
       </component>
       <component id="6cd37" class="javax.swing.JTextField" binding="txtFldExpl5">

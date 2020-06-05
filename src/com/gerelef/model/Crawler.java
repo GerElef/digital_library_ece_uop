@@ -1,5 +1,9 @@
 package com.gerelef.model;
 
+import com.gerelef.books.Book;
+import com.gerelef.books.LiteraryBook;
+import com.gerelef.books.ScientificBook;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -27,18 +31,18 @@ class Crawler {
         }
     }
 
-    LinkedList<String> searchFile(String s, boolean firstMatchExit) throws IOException, InvalidFormatException {
+    LinkedList<Book> searchFile(String s, boolean firstMatchExit) throws IOException, InvalidFormatException {
         bufferedReader = new BufferedReader(new FileReader(bookFile));
         boolean match = false;
 
-        LinkedList<String> results = new LinkedList<>();
-        String line = bufferedReader.readLine();
+        LinkedList<Book> results = new LinkedList<>();
+        String line = bufferedReader.readLine().toUpperCase();
         while(line != null){
             if (line.equals(literatureIdentifier)){
                 match = subSearch(5, literatureIdentifier, s, bufferedReader, results);
             }
             else if (line.equals(scientificIdentifier)){
-               match =  subSearch(6, scientificIdentifier, s, bufferedReader, results);
+                match = subSearch(6, scientificIdentifier, s, bufferedReader, results);
             }
 
             if (match && firstMatchExit){
@@ -48,23 +52,24 @@ class Crawler {
             line = bufferedReader.readLine();
         }
 
+        bufferedReader.close();
         return results;
     }
 
-    private boolean subSearch(int offset, String identifier, String s, BufferedReader br, List<String> results) throws IOException, InvalidFormatException {
-        String[] temp = new String[offset + 1];
-        String line = br.readLine();
-
-        temp[0] = identifier;
+    private boolean subSearch(int offset, String identifier, String s, BufferedReader br, LinkedList<Book> results)
+            throws IOException,
+            InvalidFormatException {
+        String[] temp = new String[offset];
+        String line = br.readLine().toUpperCase();
 
         boolean foundMatch = false;
 
         int i = 0;
-        while(!line.equals("")){
+        while(line != null && !line.isEmpty()){
             if (s.equals(line))
                 foundMatch = true;
 
-            temp[i + 1] = line;
+            temp[i] = line;
             line = br.readLine();
 
             ++i;
@@ -76,7 +81,13 @@ class Crawler {
         }
 
         if (foundMatch) {
-            results.addAll(Arrays.asList(temp));
+            Book book;
+            if (identifier.equals(literatureIdentifier))
+                book = new LiteraryBook(temp[0], temp[1], Long.parseLong(temp[2]), Integer.parseInt(temp[3]), temp[4]);
+            else
+                book = new ScientificBook(temp[0], temp[1], Long.parseLong(temp[2]), Integer.parseInt(temp[3]), temp[4], temp[5]);
+
+            results.add(book);
             return true;
         }
 

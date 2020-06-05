@@ -1,5 +1,6 @@
 package com.gerelef.gui.search;
 
+import com.gerelef.books.Book;
 import com.gerelef.model.IOLibManager;
 
 import javax.swing.*;
@@ -7,6 +8,7 @@ import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.text.Normalizer;
+import java.util.List;
 
 public class SearchDialog extends JDialog {
     private JPanel contentPane;
@@ -45,10 +47,7 @@ public class SearchDialog extends JDialog {
             String bookname = Normalizer.normalize(txtFldBookTitle.getText().trim().toUpperCase(), Normalizer.Form.NFD);
             String wrtrname = Normalizer.normalize(txtFldWriterName.getText().trim().toUpperCase(), Normalizer.Form.NFD);
 
-            inflatePanelBookList(bookname, wrtrname);
-
-            System.out.println(bookname);
-            System.out.println(wrtrname);
+            inflatePanelBookList(txtFldBookTitle.getText().trim().toUpperCase(), txtFldWriterName.getText().trim().toUpperCase());
         });
 
         pack();
@@ -59,9 +58,19 @@ public class SearchDialog extends JDialog {
     }
 
     private void inflatePanelBookList(String bookTitle, String writerName){
+        if (bookTitle.isEmpty() && writerName.isEmpty())
+            return;
+
         //inflate panelBookList with data from the .txt file
 
-        //start swing worker to inflate list
+        //move all this to a swing worker to inflate list
         //https://stackoverflow.com/questions/16937997/java-swingworker-thread-to-update-main-gui
+        List<Book> books = IOLibManager.searchForBook(bookTitle, writerName);
+        if (books == null)
+            return;
+
+        for (Book b : books){
+            System.out.println("Got book " + b.getTitle());
+        }
     }
 }
