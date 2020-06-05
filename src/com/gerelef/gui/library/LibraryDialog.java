@@ -13,6 +13,7 @@ public class LibraryDialog extends JDialog {
         setContentPane(contentPane);
         setModal(true);
         setMinimumSize(new Dimension(400, 600));
+        setTitle("Library Book List");
 
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         addWindowListener(new WindowAdapter() {

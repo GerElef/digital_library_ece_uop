@@ -15,6 +15,7 @@ public class InsertDialog extends JDialog {
         setContentPane(contentPane);
         setModal(true);
         setMinimumSize(new Dimension(400, 400));
+        setTitle("Type of book to insert.");
 
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         addWindowListener(new WindowAdapter() {
@@ -27,7 +28,9 @@ public class InsertDialog extends JDialog {
         selectBookTypeTextField.setEditable(false);
 
         btnLiterary.addActionListener(e -> {
-            //start literary gui
+            InsertLiteraryBookDialog literaryBookDialog = new InsertLiteraryBookDialog();
+            literaryBookDialog.setModalExclusionType(ModalExclusionType.APPLICATION_EXCLUDE);
+            literaryBookDialog.setVisible(true);
             dispose();
         });
 

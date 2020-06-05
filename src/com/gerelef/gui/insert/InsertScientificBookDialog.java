@@ -26,7 +26,8 @@ public class InsertScientificBookDialog extends JDialog {
     public InsertScientificBookDialog() {
         setContentPane(contentPane);
         setModal(true);
-        setMinimumSize(new Dimension(600, 600));
+        setMinimumSize(new Dimension(600, 400));
+        setTitle("Insert Scientific Book");
 
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         addWindowListener(new WindowAdapter() {

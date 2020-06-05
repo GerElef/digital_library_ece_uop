@@ -1,5 +1,7 @@
 package com.gerelef.gui.search;
 
+import com.gerelef.model.IOLibManager;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
@@ -15,10 +17,13 @@ public class SearchDialog extends JDialog {
     private JButton btnSearch;
     private JPanel pnlBookList;
 
+    private IOLibManager libManager = IOLibManager.getInstance();
+
     public SearchDialog() {
         setContentPane(contentPane);
         setModal(true);
         setMinimumSize(new Dimension(400, 600));
+        setTitle("Search for a book");
 
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         addWindowListener(new WindowAdapter() {
