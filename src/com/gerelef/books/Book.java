@@ -12,15 +12,15 @@ abstract public class Book {
 
     final int date;
 
-    final String book_type;
+    final String bookType;
 
-    Book(String type, String title, String writer, long ISBN, int date, String book_type){
+    Book(String type, String title, String writer, long ISBN, int date, String bookType){
         this.type   = type;
         this.title  = title;
         this.writer = writer;
         this.ISBN   = ISBN;
         this.date   = date;
-        this.book_type = book_type;
+        this.bookType = bookType;
     }
 
     public String getTitle() {
@@ -39,11 +39,15 @@ abstract public class Book {
         return date;
     }
 
-    public String getBook_type() {
-        return book_type;
+    public String getBookType() {
+        return bookType;
     }
 
     public boolean equals(Book b){
-        return this.getISBN() == b.getISBN();
+        return (this.getISBN() == b.getISBN() && this.getWriter().equals(b.getWriter()));
+    }
+
+    public String getOutputFormat(){
+        return type + "\n" + title + "\n" + writer + "\n" + ISBN + "\n" + date + "\n" + bookType + "\n";
     }
 }

@@ -8,6 +8,7 @@ import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.text.Normalizer;
+import java.util.ArrayList;
 import java.util.List;
 
 public class SearchDialog extends JDialog {
@@ -58,14 +59,14 @@ public class SearchDialog extends JDialog {
     }
 
     private void inflatePanelBookList(String bookTitle, String writerName){
-        if (bookTitle.isEmpty() && writerName.isEmpty())
+        if (bookTitle.isBlank() && writerName.isBlank())
             return;
 
         //inflate panelBookList with data from the .txt file
 
         //move all this to a swing worker to inflate list
         //https://stackoverflow.com/questions/16937997/java-swingworker-thread-to-update-main-gui
-        List<Book> books = IOLibManager.searchForBook(bookTitle, writerName);
+        ArrayList<Book> books = IOLibManager.searchForBook(bookTitle, writerName);
         if (books == null)
             return;
 

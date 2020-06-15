@@ -1,10 +1,14 @@
 package com.gerelef.gui.library;
 
+import com.gerelef.model.IOLibManager;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 
 public class LibraryDialog extends JDialog {
+    IOLibManager libManager = IOLibManager.getInstance();
+
     private JPanel  contentPane;
     private JButton btnRefreshList;
     private JPanel  pnlBookList;
@@ -37,6 +41,7 @@ public class LibraryDialog extends JDialog {
 
     private void cleanupPanelBookList(){
         //clean up all data on panel pnlBookList
+        pnlBookList.removeAll();
     }
 
     private void inflatePanelBookList(){
@@ -44,5 +49,7 @@ public class LibraryDialog extends JDialog {
 
         //start swing worker to inflate list
         //https://stackoverflow.com/questions/16937997/java-swingworker-thread-to-update-main-gui
+        libManager.getAllBooks();
+        pnlBookList.revalidate();
     }
 }

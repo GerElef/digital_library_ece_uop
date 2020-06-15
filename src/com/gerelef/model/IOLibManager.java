@@ -1,10 +1,13 @@
 package com.gerelef.model;
 
 import com.gerelef.books.Book;
+import com.gerelef.books.LiteraryBook;
+import com.gerelef.books.ScientificBook;
 
-import java.io.*;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.ArrayList;
+
+import static com.gerelef.model.Helper.*;
+import static com.gerelef.model.Helper.validateType;
 
 public class IOLibManager {
     private static IOLibManager instance = null;
@@ -13,57 +16,83 @@ public class IOLibManager {
     //define search in crawler class
     //maybe use this to optimize https://stackoverflow.com/questions/304268/getting-a-files-md5-checksum-in-java
 
-    static Crawler crawler = new Crawler();
+    static Crawler crawler   = null;
+    static Searcher searcher = null;
 
     private IOLibManager(){}
 
     public static IOLibManager getInstance() {
-        if (instance == null)
+        if (instance == null) {
             instance = new IOLibManager();
+
+            crawler  = new Crawler();
+            searcher = new Searcher();
+        }
 
         return instance;
     }
 
-    public static List<Book> searchForBook(String title, String writer) {
-        if (title.isEmpty() && writer.isEmpty())
+    public synchronized static ArrayList<Book> searchForBook(String title, String writer) {
+        if(title.isBlank() && writer.isBlank())
             throw new IllegalArgumentException();
 
-        boolean checkForDuplicates = false;
-
-        List<Book> books = new LinkedList<>();
-        try {
-            if (title.isEmpty())
-                books.addAll(crawler.searchFile(writer, false));
-            else if (writer.isEmpty())
-                books.addAll(crawler.searchFile(title, false));
-            else {
-                books.addAll(crawler.searchFile(title, false));
-                books.addAll(crawler.searchFile(writer, false));
-                checkForDuplicates = true; //duplicates can only exist when pulling twice from the same record
-            }
-        } catch (Crawler.InvalidFormatException | IOException ex) {
-            ex.printStackTrace();
-            return null;
-        }
-
-        if (books.isEmpty())
-            return null;
-
-        if (checkForDuplicates) {
-            //checks for duplicates, and removes them as such
-            for(int i = 0; i < books.size(); ++i) {
-                Book b = books.get(i);
-                for (int j = i + 1; j < books.size(); ++j){
-                    Book temp_book = books.get(j);
-                    if (temp_book.equals(b)){
-                        books.remove(j); // there can not be more than 1 duplicates in the records since ISBNs are unique
-                        break;
-                    }
-                }
-            }
-        }
+        ArrayList<Book> books;
+        if (writer.isBlank())
+            books = searcher.searchForBook(title, crawler.getAllBooks());
+        else if(title.isBlank())
+            books = searcher.searchForWriter(writer, crawler.getAllBooks());
+        else
+            books = searcher.searchForBookAndWriter(title, writer, crawler.getAllBooks());
 
         return books;
+    }
+
+    public synchronized ArrayList<Book> getAllBooks(){
+        return crawler.getAllBooks();
+    }
+
+    //book name + ISBN to be completely confident only 1 match will turn up
+    public synchronized void removeBook(String title, long ISBN) {
+        ArrayList<Book> books = crawler.getAllBooks();
+
+        for (Book book : books) {
+            if (book.getISBN() == ISBN && book.getTitle().equals(title)) {
+                crawler.removeBook(book);
+                break;
+            }
+        }
+    }
+
+    public synchronized void addBook(String typeStr, String title, String writer,
+                                     String ISBNStr, String dateStr, String bookType, String field){
+        try{
+            String type = normalizeGreek(typeStr).toUpperCase();
+
+            title = title.trim();
+            writer = writer.trim();
+            long ISBN = convertISBN(ISBNStr.trim());
+            int date = convertDate(dateStr.trim());
+
+            String[] fields;
+            if(Helper.getLiteratureIdentifier().equals(type)) {
+                fields = new String[]{"ΜΥΘΙΣΤΟΡΗΜΑ", "ΝΟΥΒΕΛΑ", "ΔΙΗΓΗΜΑ", "ΠΟΙΗΣΗ"};
+                bookType = validateType(normalizeGreek(bookType.trim().toUpperCase()), fields);
+                crawler.addBook(new LiteraryBook(title, writer, ISBN, date, bookType));
+            }
+            else {
+                fields = new String[]{"ΠΕΡΙΟΔΙΚΟ", "ΒΙΒΛΙΟ", "ΠΡΑΚΤΙΚΑ ΣΥΝΕΔΡΙΩΝ"};
+                bookType = validateType(normalizeGreek(bookType.trim().toUpperCase()), fields);
+                crawler.addBook(new ScientificBook(title, writer, ISBN, date, bookType, field));
+            }
+
+        } catch (Crawler.InvalidFormatException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public void addBook(String type, String title, String writer, String ISBN, String date, String bookType){
+        addBook(type, title, writer, ISBN, date, bookType, "");
     }
 
 

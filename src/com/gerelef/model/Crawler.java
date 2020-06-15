@@ -4,20 +4,20 @@ import com.gerelef.books.Book;
 import com.gerelef.books.LiteraryBook;
 import com.gerelef.books.ScientificBook;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
+import java.io.*;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+
+import static com.gerelef.model.Helper.*;
 
 class Crawler {
+
+    private ArrayList<Book> books = null;
+    // -1 init so the file definitely hasn't been loaded into cache, .lastModifier() returns 0L >=
+    private long loadedDataDate = -1;
+
     File bookFile = new File(".\\books.txt");
     BufferedReader bufferedReader;
-
-    private final static String literatureIdentifier = "ΛΟΓΟΤΕΧΝΙΚΟ";
-    private final static String scientificIdentifier = "ΕΠΙΣΤΗΜΟΝΙΚΟ";
 
     Crawler(){
         try {
@@ -28,71 +28,175 @@ class Crawler {
 
         } catch (IOException ex) {
             ex.printStackTrace();
+            System.out.println("Couldn't create file because " + ex.toString());
+            System.exit(-1);
         }
     }
 
-    LinkedList<Book> searchFile(String s, boolean firstMatchExit) throws IOException, InvalidFormatException {
+    ArrayList<Book> getAllBooks(){
+        try{
+            if (!dataIsUpdated())
+                loadBooksFromFile();
+        } catch (IOException ex) {
+            System.out.println("");
+        }
+        return books;
+    }
+
+    private boolean dataIsUpdated(){
+        return books != null && (loadedDataDate >= bookFile.lastModified());
+    }
+
+    private void loadBooksFromFile() throws IOException {
         bufferedReader = new BufferedReader(new FileReader(bookFile));
-        boolean match = false;
+        String line = bufferedReader.readLine();
+        ArrayList<Book> tempBooks = new ArrayList<>();
 
-        LinkedList<Book> results = new LinkedList<>();
-        String line = bufferedReader.readLine().toUpperCase();
         while(line != null){
-            if (line.equals(literatureIdentifier)){
-                match = subSearch(5, literatureIdentifier, s, bufferedReader, results);
-            }
-            else if (line.equals(scientificIdentifier)){
-                match = subSearch(6, scientificIdentifier, s, bufferedReader, results);
-            }
+            try{
+                switch (line) {
+                    case literatureIdentifier:
+                        tempBooks.add(getLiteratureBook());
+                        break;
+                    case scientificIdentifier:
+                        tempBooks.add(getScientificBook());
+                        break;
+                    case "":
+                        //do nothing, line is empty
+                        break;
+                    default:
+                        /*if the line result falls out of boundaries, throw an exception
+                         * to validate and try to fix the db */
+                        throw new InvalidFormatException();
+                }
 
-            if (match && firstMatchExit){
-                return results;
+            } catch (InvalidFormatException e) {
+                System.out.println("DB is corrupt; trying to fix it now... ");
+                //call function to fix the db here
+                fixDatabase();
+                bufferedReader.close();
+                loadedDataDate = bookFile.lastModified();
+                return;
             }
 
             line = bufferedReader.readLine();
         }
 
+        //stores books into the cache as an array
+        //updates the loadedDataDate to the latest value
+        books = tempBooks;
+        loadedDataDate = bookFile.lastModified();
+
         bufferedReader.close();
-        return results;
     }
 
-    private boolean subSearch(int offset, String identifier, String s, BufferedReader br, LinkedList<Book> results)
-            throws IOException,
-            InvalidFormatException {
-        String[] temp = new String[offset];
-        String line = br.readLine().toUpperCase();
+    private void fixDatabase() throws IOException {
+        //do stuff...
+        //clear any loaded data in the cache, and try to rebuild the db
+        BufferedReader reader = new BufferedReader(new FileReader(bookFile));
 
-        boolean foundMatch = false;
+        ArrayList<Book> tempBooks = new ArrayList<>();
 
-        int i = 0;
-        while(line != null && !line.isEmpty()){
-            if (s.equals(line))
-                foundMatch = true;
+        String line = reader.readLine();
+        while(line != null){
+            line = normalizeGreek(line).toUpperCase().trim();
 
-            temp[i] = line;
-            line = br.readLine();
+            Book b = null;
+            if (line.equals(getLiteratureIdentifier())){
+                b = getCorruptLiteratureBook(reader);
+            }
+            else if (line.equals(getScientificIdentifier())){
+                b = getCorruptScientificBook(reader);
+            }
 
-            ++i;
+            if (b != null){
+                tempBooks.add(b);
+            }
+
+            line = reader.readLine();
         }
 
-        //we read less lines than we should've, throw an exception
-        if(offset != i ){
-            throw new InvalidFormatException();
-        }
-
-        if (foundMatch) {
-            Book book;
-            if (identifier.equals(literatureIdentifier))
-                book = new LiteraryBook(temp[0], temp[1], Long.parseLong(temp[2]), Integer.parseInt(temp[3]), temp[4]);
-            else
-                book = new ScientificBook(temp[0], temp[1], Long.parseLong(temp[2]), Integer.parseInt(temp[3]), temp[4], temp[5]);
-
-            results.add(book);
-            return true;
-        }
-
-        return false;
+        reader.close();
+        books = tempBooks;
+        outputDataToDisk(books);
     }
 
-    class InvalidFormatException extends Throwable{}
+    private LiteraryBook getCorruptLiteratureBook(BufferedReader br){
+        try{
+            String title  = validateName(Helper.normalizeGreek(br.readLine()).toUpperCase());
+            String writer = validateName(Helper.normalizeGreek(br.readLine()).toUpperCase());
+            long ISBN = convertISBN(br.readLine().trim());
+            int date  = convertDate(br.readLine().trim());
+            String bookType = validateType(normalizeGreek(br.readLine().trim()).toUpperCase(), getLiteraryFields());
+
+            return new LiteraryBook(title, writer, ISBN, date, bookType);
+        } catch (Exception | InvalidFormatException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private ScientificBook getCorruptScientificBook(BufferedReader br){
+        try{
+            String title  = validateName(Helper.normalizeGreek(br.readLine()).toUpperCase());
+            String writer = validateName(Helper.normalizeGreek(br.readLine()).toUpperCase());
+            long ISBN = convertISBN(br.readLine().trim());
+            int date  = convertDate(br.readLine().trim());
+            String bookType = validateType(normalizeGreek(br.readLine().trim()).toUpperCase(), getLiteraryFields());
+            String scientificField = br.readLine();
+
+            return new ScientificBook(title, writer, ISBN, date, bookType, scientificField);
+        } catch (Exception | InvalidFormatException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private LiteraryBook getLiteratureBook() throws IOException, InvalidFormatException {
+        String title  = validateName(bufferedReader.readLine().trim());
+        String writer = validateName(bufferedReader.readLine().trim());
+        long ISBN = convertISBN(bufferedReader.readLine().trim());
+        int date = convertDate(bufferedReader.readLine().trim());
+        String bookType = validateType(bufferedReader.readLine().trim(), getLiteraryFields());
+
+        return new LiteraryBook(title, writer, ISBN, date, bookType);
+    }
+
+    private ScientificBook getScientificBook() throws IOException, InvalidFormatException {
+        String title = validateName(bufferedReader.readLine().trim());
+        String writer = validateName(bufferedReader.readLine().trim());
+        long ISBN = convertISBN(bufferedReader.readLine().trim());
+        int date = convertDate(bufferedReader.readLine().trim());
+        String bookType = validateType(bufferedReader.readLine().trim(), getScientificFields());
+        String scientificField = bufferedReader.readLine();
+
+        return new ScientificBook(title, writer, ISBN, date, bookType, scientificField);
+    }
+
+    void addBook(Book b){
+        books.add(b);
+
+        outputDataToDisk(books);
+    }
+
+    void removeBook(Book b){
+        books.remove(b);
+
+        outputDataToDisk(books);
+    }
+
+    private void outputDataToDisk(ArrayList<Book> books) {
+        try {
+            BufferedWriter bw = new BufferedWriter(new FileWriter(bookFile));
+            for (Book book : books) {
+                bw.write(book.getOutputFormat());
+                bw.write("");
+            }
+            bw.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static class InvalidFormatException extends Throwable{}
 }
