@@ -36,11 +36,12 @@ public class InsertDialog extends JDialog {
 
         btnScientific.addActionListener(e -> {
             InsertScientificBookDialog scientificBookDialog = new InsertScientificBookDialog();
-            scientificBookDialog.setModalExclusionType(Dialog.ModalExclusionType.APPLICATION_EXCLUDE);
+            scientificBookDialog.setModalExclusionType(ModalExclusionType.APPLICATION_EXCLUDE);
             scientificBookDialog.setVisible(true);
             dispose();
         });
 
         pack();
     }
+
 }

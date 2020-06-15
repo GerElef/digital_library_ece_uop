@@ -9,9 +9,9 @@ import java.awt.event.*;
 public class LibraryDialog extends JDialog {
     IOLibManager libManager = IOLibManager.getInstance();
 
-    private JPanel  contentPane;
+    private JPanel contentPane;
     private JButton btnRefreshList;
-    private JPanel  pnlBookList;
+    private JPanel pnlBookList;
 
     public LibraryDialog() {
         setContentPane(contentPane);
@@ -26,30 +26,27 @@ public class LibraryDialog extends JDialog {
             }
         });
 
+        pnlBookList.setLayout(new BoxLayout(pnlBookList, BoxLayout.PAGE_AXIS));
+
         btnRefreshList.addActionListener(e -> {
             //stop the worker if already running (add a method (?))
             cleanupPanelBookList(); //clean up list before adding stuff again
             inflatePanelBookList();
         });
 
-        inflatePanelBookList();
-
         pack();
 
         //TO-DO: add confirmation message when clicking on the "x" remove icon-button
     }
 
-    private void cleanupPanelBookList(){
+    private void cleanupPanelBookList() {
         //clean up all data on panel pnlBookList
         pnlBookList.removeAll();
     }
 
-    private void inflatePanelBookList(){
+    private void inflatePanelBookList() {
         //inflate panelBookList with data from the .txt file
-
-        //start swing worker to inflate list
-        //https://stackoverflow.com/questions/16937997/java-swingworker-thread-to-update-main-gui
-        libManager.getAllBooks();
-        pnlBookList.revalidate();
+        new Thread(new Inflator(pnlBookList)).start();
     }
+
 }

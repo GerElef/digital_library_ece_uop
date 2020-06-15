@@ -1,5 +1,8 @@
 package com.gerelef.gui.insert;
 
+import com.gerelef.model.Helper;
+import com.gerelef.model.IOLibManager;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
@@ -55,8 +58,25 @@ public class InsertScientificBookDialog extends JDialog {
         txtPaneFreetext.setLineWrap(true);
 
         btnDone.addActionListener(e -> {
-            if (userIsDone()){
-                //add to db and dispose
+            if (userIsDone()) {
+                new Thread(() -> {
+                    IOLibManager libManager = IOLibManager.getInstance();
+                    String title = Helper.normalizeGreek(txtFldBookTitle.getText()).toUpperCase().trim();
+                    String writer = Helper.normalizeGreek(txtFldWriterName.getText()).toUpperCase().trim();
+                    long ISBN = Long.parseLong(txtFldISBN.getText());
+                    int date = Integer.parseInt(txtFldDate.getText());
+                    String freetext = txtPaneFreetext.getText();
+
+                    String type;
+                    if (rdBtnBook.isSelected())
+                        type = "ΒΙΒΛΙΟ";
+                    else if (rdBtnLogging.isSelected())
+                        type = "ΠΡΑΚΤΙΚΑ ΣΥΝΕΔΡΙΩΝ";
+                    else
+                        type = "ΠΕΡΙΟΔΙΚΟ";
+
+                    libManager.addBook(Helper.getScientificIdentifier(), title, writer, ISBN, date, type, freetext);
+                }).start();
                 dispose();
             }
         });
@@ -64,16 +84,29 @@ public class InsertScientificBookDialog extends JDialog {
         pack();
     }
 
-    boolean inputIsValid(){
-        boolean dataIsValid = true;
-
+    boolean inputIsValid() {
         //do all user input validity checks here
+        boolean rdBtnIsChecked = rdBtnLogging.isSelected() ||
+                rdBtnBook.isSelected() ||
+                rdBtnMagazine.isSelected();
 
-        return dataIsValid;
+        boolean dateIsValid = txtFldDate.getText().matches("[0-9]+") && txtFldDate.getText().length() <= 4;
+        boolean ISBNIsValid = txtFldISBN.getText().length() == 13 &&
+                txtFldISBN.getText().matches("[0-9]+") &&
+                (txtFldISBN.getText().startsWith("978") || txtFldISBN.getText().startsWith("979"));
+
+        String title = Helper.normalizeGreek(txtFldBookTitle.getText()).toUpperCase();
+        boolean titleIsValid = Helper.isInEnglish(title) || Helper.isInGreek(title);
+
+        String writer = Helper.normalizeGreek(txtFldWriterName.getText()).toUpperCase();
+        boolean writerIsValid = Helper.isInEnglish(writer) || Helper.isInGreek(writer);
+        boolean fieldIsValid = !txtPaneFreetext.getText().isEmpty() && !txtPaneFreetext.getText().contains("\n");
+
+        return rdBtnIsChecked && dateIsValid && ISBNIsValid && titleIsValid && writerIsValid && fieldIsValid;
     }
 
-    boolean userIsDone(){
-        if (inputIsValid()){
+    boolean userIsDone() {
+        if (inputIsValid()) {
             //show prompt to confirm
             //0 is OK
             //1 is NO
@@ -83,11 +116,12 @@ public class InsertScientificBookDialog extends JDialog {
             //if ans is 0 (ok) return true
             return ans == 0;
 
-        }else{
+        } else {
             //show warning that it cannot finish
             JOptionPane.showMessageDialog(this, "Data is invalid -- please check again.");
         }
 
         return false;
     }
+
 }

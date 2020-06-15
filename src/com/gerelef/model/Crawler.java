@@ -12,7 +12,7 @@ import static com.gerelef.model.Helper.*;
 
 class Crawler {
 
-    private ArrayList<Book> books = null;
+    private ArrayList<Book> books = new ArrayList<>();
     // -1 init so the file definitely hasn't been loaded into cache, .lastModifier() returns 0L >=
     private long loadedDataDate = -1;
 
@@ -22,8 +22,8 @@ class Crawler {
     Crawler(){
         try {
             if (!bookFile.exists()){
-                bookFile.createNewFile();
-                System.out.println("Created file at " + bookFile.getAbsolutePath());
+                if (bookFile.createNewFile())
+                    System.out.println("Created file at " + bookFile.getAbsolutePath());
             }
 
         } catch (IOException ex) {
@@ -38,7 +38,7 @@ class Crawler {
             if (!dataIsUpdated())
                 loadBooksFromFile();
         } catch (IOException ex) {
-            System.out.println("");
+            System.exit(-1);
         }
         return books;
     }
@@ -131,7 +131,6 @@ class Crawler {
 
             return new LiteraryBook(title, writer, ISBN, date, bookType);
         } catch (Exception | InvalidFormatException e) {
-            e.printStackTrace();
             return null;
         }
     }
@@ -142,12 +141,11 @@ class Crawler {
             String writer = validateName(Helper.normalizeGreek(br.readLine()).toUpperCase());
             long ISBN = convertISBN(br.readLine().trim());
             int date  = convertDate(br.readLine().trim());
-            String bookType = validateType(normalizeGreek(br.readLine().trim()).toUpperCase(), getLiteraryFields());
+            String bookType = validateType(normalizeGreek(br.readLine().trim()).toUpperCase(), getScientificFields());
             String scientificField = br.readLine();
 
             return new ScientificBook(title, writer, ISBN, date, bookType, scientificField);
         } catch (Exception | InvalidFormatException e) {
-            e.printStackTrace();
             return null;
         }
     }
@@ -174,15 +172,29 @@ class Crawler {
     }
 
     void addBook(Book b){
-        books.add(b);
+        try {
+            if (!dataIsUpdated())
+                loadBooksFromFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
+        books.add(b);
         outputDataToDisk(books);
+        loadedDataDate = bookFile.lastModified();
     }
 
     void removeBook(Book b){
-        books.remove(b);
+        try{
+            if (!dataIsUpdated())
+                loadBooksFromFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
+        books.remove(b);
         outputDataToDisk(books);
+        loadedDataDate = bookFile.lastModified();
     }
 
     private void outputDataToDisk(ArrayList<Book> books) {

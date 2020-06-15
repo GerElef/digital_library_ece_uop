@@ -1,5 +1,8 @@
 package com.gerelef.gui.insert;
 
+import com.gerelef.model.Helper;
+import com.gerelef.model.IOLibManager;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
@@ -8,7 +11,7 @@ import java.awt.event.WindowEvent;
 public class InsertLiteraryBookDialog extends JDialog {
     private JPanel contentPane;
     private JTextField txtFldBookTitle;
-    private JTextField txtFieldWriterName;
+    private JTextField txtFldWriterName;
     private JTextField txtFldISBN;
     private JTextField txtFldDate;
     private JRadioButton rdBtnFiction;
@@ -48,8 +51,26 @@ public class InsertLiteraryBookDialog extends JDialog {
         txtFldExpl5.setOpaque(true);
 
         btnDone.addActionListener(e -> {
-            if (userIsDone()){
-                //add to db and dispose
+            if (userIsDone()) {
+                new Thread(() -> {
+                    IOLibManager libManager = IOLibManager.getInstance();
+                    String title = Helper.normalizeGreek(txtFldBookTitle.getText()).toUpperCase().trim();
+                    String writer = Helper.normalizeGreek(txtFldWriterName.getText()).toUpperCase().trim();
+                    long ISBN = Long.parseLong(txtFldISBN.getText());
+                    int date = Integer.parseInt(txtFldDate.getText());
+
+                    String type;
+                    if (rdBtnFiction.isSelected())
+                        type = "ΜΥΘΙΣΤΟΡΗΜΑ";
+                    else if (rdBtnNarration.isSelected())
+                        type = "ΔΙΗΓΗΜΑ";
+                    else if (rdBtnNovel.isSelected())
+                        type = "ΝΟΥΒΕΛΑ";
+                    else
+                        type = "ΠΟΙΗΣΗ";
+
+                    libManager.addBook(Helper.getLiteratureIdentifier(), title, writer, ISBN, date, type);
+                }).start();
                 dispose();
             }
         });
@@ -57,16 +78,30 @@ public class InsertLiteraryBookDialog extends JDialog {
         pack();
     }
 
-    boolean inputIsValid(){
-        boolean dataIsValid = true;
-
+    boolean inputIsValid() {
         //do all user input validity checks here
+        boolean rdBtnIsChecked = rdBtnFiction.isSelected() ||
+                rdBtnNarration.isSelected() ||
+                rdBtnNovel.isSelected() ||
+                rdBtnPoetry.isSelected();
 
-        return dataIsValid;
+        boolean dateIsValid = txtFldDate.getText().matches("[0-9]+") && txtFldDate.getText().length() <= 4;
+        boolean ISBNIsValid = txtFldISBN.getText().length() == 13 &&
+                txtFldISBN.getText().matches("[0-9]+") &&
+                (txtFldISBN.getText().substring(0, 3).equals("978") || txtFldISBN.getText().substring(0, 3).equals("979"));
+
+        String title = Helper.normalizeGreek(txtFldBookTitle.getText()).toUpperCase();
+        boolean titleIsValid = Helper.isInEnglish(title) || Helper.isInGreek(title);
+
+        String writer = Helper.normalizeGreek(txtFldWriterName.getText()).toUpperCase();
+        boolean writerIsValid = Helper.isInEnglish(writer) || Helper.isInGreek(writer);
+
+
+        return rdBtnIsChecked && dateIsValid && ISBNIsValid && titleIsValid && writerIsValid;
     }
 
-    boolean userIsDone(){
-        if (inputIsValid()){
+    boolean userIsDone() {
+        if (inputIsValid()) {
             //show prompt to confirm
             //0 is OK
             //1 is NO
@@ -76,11 +111,12 @@ public class InsertLiteraryBookDialog extends JDialog {
             //if ans is 0 (ok) return true
             return ans == 0;
 
-        }else{
+        } else {
             //show warning that it cannot finish
             JOptionPane.showMessageDialog(this, "Data is invalid -- please check again.");
         }
 
         return false;
     }
+
 }

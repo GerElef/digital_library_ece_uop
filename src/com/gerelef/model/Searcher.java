@@ -5,7 +5,7 @@ import com.gerelef.books.Book;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
-public class Searcher {
+class Searcher {
 
     ArrayList<Book> searchForBookAndWriter(String b, String w, ArrayList<Book> books){
         ArrayList<Book> foundBooks = new ArrayList<>();

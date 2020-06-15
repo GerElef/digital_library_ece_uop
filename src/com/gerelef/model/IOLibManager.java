@@ -63,35 +63,22 @@ public class IOLibManager {
         }
     }
 
-    public synchronized void addBook(String typeStr, String title, String writer,
-                                     String ISBNStr, String dateStr, String bookType, String field){
-        try{
-            String type = normalizeGreek(typeStr).toUpperCase();
+    public synchronized void removeBook(Book b) {
+        crawler.removeBook(b);
+    }
 
-            title = title.trim();
-            writer = writer.trim();
-            long ISBN = convertISBN(ISBNStr.trim());
-            int date = convertDate(dateStr.trim());
+    public synchronized void addBook(String type, String title, String writer,
+                                     long ISBN, int date, String bookType, String field){
 
-            String[] fields;
-            if(Helper.getLiteratureIdentifier().equals(type)) {
-                fields = new String[]{"ΜΥΘΙΣΤΟΡΗΜΑ", "ΝΟΥΒΕΛΑ", "ΔΙΗΓΗΜΑ", "ΠΟΙΗΣΗ"};
-                bookType = validateType(normalizeGreek(bookType.trim().toUpperCase()), fields);
-                crawler.addBook(new LiteraryBook(title, writer, ISBN, date, bookType));
-            }
-            else {
-                fields = new String[]{"ΠΕΡΙΟΔΙΚΟ", "ΒΙΒΛΙΟ", "ΠΡΑΚΤΙΚΑ ΣΥΝΕΔΡΙΩΝ"};
-                bookType = validateType(normalizeGreek(bookType.trim().toUpperCase()), fields);
-                crawler.addBook(new ScientificBook(title, writer, ISBN, date, bookType, field));
-            }
+        if(Helper.getLiteratureIdentifier().equals(type))
+            crawler.addBook(new LiteraryBook(title, writer, ISBN, date, bookType));
+        else
+            crawler.addBook(new ScientificBook(title, writer, ISBN, date, bookType, field));
 
-        } catch (Crawler.InvalidFormatException e) {
-            e.printStackTrace();
-        }
 
     }
 
-    public void addBook(String type, String title, String writer, String ISBN, String date, String bookType){
+    public void addBook(String type, String title, String writer, long ISBN, int date, String bookType){
         addBook(type, title, writer, ISBN, date, bookType, "");
     }
 

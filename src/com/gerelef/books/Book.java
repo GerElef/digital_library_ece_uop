@@ -23,6 +23,10 @@ abstract public class Book {
         this.bookType = bookType;
     }
 
+    public String getType(){
+        return type;
+    }
+
     public String getTitle() {
         return title;
     }

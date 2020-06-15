@@ -14,7 +14,7 @@ public class IntroductionGUI extends JFrame {
     private JButton btnSearchLibrary;
     private JButton btnInsertLibrary;
 
-    public IntroductionGUI(){
+    public IntroductionGUI() {
         add(pnlRoot);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setMinimumSize(new Dimension(400, 200));
@@ -26,7 +26,7 @@ public class IntroductionGUI extends JFrame {
         pack();
     }
 
-    public void addListeners(){
+    public void addListeners() {
 
         //https://docs.oracle.com/javase/tutorial/uiswing/misc/modality.html
         btnViewLibrary.addActionListener(e -> {
@@ -47,9 +47,10 @@ public class IntroductionGUI extends JFrame {
             insertDialog.setVisible(true);
         });
 
-        btnExitLibrary.addActionListener(e ->{
+        btnExitLibrary.addActionListener(e -> {
             //save anything pending here, then dispose
             dispose();
         });
     }
+
 }
