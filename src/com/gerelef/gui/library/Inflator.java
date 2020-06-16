@@ -8,7 +8,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -83,7 +82,8 @@ class Inflator implements Runnable {
 
         ImagePanel(Book b, Component parent){
             try {
-                image = ImageIO.read(new File(".\\icons\\delete_book.png"));
+                System.out.println(getClass().getResource("/images/delete_book.png"));
+                image = ImageIO.read(getClass().getResource("/images/delete_book.png"));
             }catch (IOException e) {
                 e.printStackTrace();
                 System.exit(-1);
