@@ -6,15 +6,10 @@ import com.gerelef.books.ScientificBook;
 
 import java.util.ArrayList;
 
-import static com.gerelef.model.Helper.*;
-import static com.gerelef.model.Helper.validateType;
 
+/* API for the GUI to get/send data */
 public class IOLibManager {
     private static IOLibManager instance = null;
-    //define insertion in inserter class
-    //define deletion in deleter here
-    //define search in crawler class
-    //maybe use this to optimize https://stackoverflow.com/questions/304268/getting-a-files-md5-checksum-in-java
 
     static Crawler crawler   = null;
     static Searcher searcher = null;
@@ -33,13 +28,14 @@ public class IOLibManager {
     }
 
     public synchronized static ArrayList<Book> searchForBook(String title, String writer) {
-        if(title.isBlank() && writer.isBlank())
+        if(title.isEmpty() && writer.isEmpty())
             throw new IllegalArgumentException();
 
         ArrayList<Book> books;
-        if (writer.isBlank())
+
+        if (writer.isEmpty())
             books = searcher.searchForBook(title, crawler.getAllBooks());
-        else if(title.isBlank())
+        else if(title.isEmpty())
             books = searcher.searchForWriter(writer, crawler.getAllBooks());
         else
             books = searcher.searchForBookAndWriter(title, writer, crawler.getAllBooks());
@@ -52,6 +48,7 @@ public class IOLibManager {
     }
 
     //book name + ISBN to be completely confident only 1 match will turn up
+    //might be used later
     public synchronized void removeBook(String title, long ISBN) {
         ArrayList<Book> books = crawler.getAllBooks();
 
@@ -69,13 +66,10 @@ public class IOLibManager {
 
     public synchronized void addBook(String type, String title, String writer,
                                      long ISBN, int date, String bookType, String field){
-
         if(Helper.getLiteratureIdentifier().equals(type))
             crawler.addBook(new LiteraryBook(title, writer, ISBN, date, bookType));
         else
             crawler.addBook(new ScientificBook(title, writer, ISBN, date, bookType, field));
-
-
     }
 
     public void addBook(String type, String title, String writer, long ISBN, int date, String bookType){

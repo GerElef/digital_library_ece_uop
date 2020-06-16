@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="digital_library_ece_uop:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/digital_library_ece_uop_jar</output-path>
+    <root id="archive" name="digital_library_ece_uop.jar">
+      <element id="module-output" name="digital_library_ece_uop" />
+    </root>
+  </artifact>
+</component>

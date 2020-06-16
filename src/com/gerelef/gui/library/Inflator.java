@@ -14,9 +14,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
+/* Responsible for inflating the ui */
 class Inflator implements Runnable {
-    IOLibManager libManager = IOLibManager.getInstance();
-    JPanel guipanel;
+    private IOLibManager libManager = IOLibManager.getInstance();
+    private JPanel guipanel;
 
     Inflator(JPanel panel){
         this.guipanel = panel;
@@ -27,6 +28,9 @@ class Inflator implements Runnable {
         ArrayList<Book> books = libManager.getAllBooks();
 
         for (Book b : books) {
+            //Creates 4 containers (JPanels)
+            //container holds the other 3 containers
+            //which each have two JTextPanes
             JPanel container = new JPanel();
             JPanel container1 = new JPanel();
             JPanel container2 = new JPanel();
@@ -48,9 +52,10 @@ class Inflator implements Runnable {
             title.setText(b.getTitle());
             writer.setText(b.getWriter());
             bookType.setText(b.getBookType());
-            ISBN.setText(b.getISBN() + "");
-            date.setText(b.getDate() + "");
+            ISBN.setText(b.getISBN() + ""); //quick convert to string (implicitly calls StringBuilder)
+            date.setText(b.getDate() + ""); //quick convert to string (implicitly calls StringBuilder)
 
+            //adds rigid areas to 1rst and 3rd container to align itself with the img X box
             container1.add(type);
             container1.add(title);
             container1.add(Box.createRigidArea(new Dimension(32, 32)));
@@ -69,11 +74,12 @@ class Inflator implements Runnable {
         guipanel.revalidate();
     }
 
+    //imagePanel is the X button class
     class ImagePanel extends JPanel {
 
-        IOLibManager libManager = IOLibManager.getInstance();
-        BufferedImage image;
-        Book b;
+        private IOLibManager libManager = IOLibManager.getInstance();
+        private BufferedImage image;
+        private Book b;
 
         ImagePanel(Book b, Component parent){
             try {
@@ -89,7 +95,7 @@ class Inflator implements Runnable {
                 @Override
                 public void mouseClicked(MouseEvent e) {
                     super.mouseClicked(e);
-                    System.out.println();
+                    //if mouse gets clicked, show dialog and if it's value is 0 (OK), remove the book
                     int res = JOptionPane.showConfirmDialog(parent, "Are you sure you want to delete this file?");
                     switch (res){
                         case 0:
@@ -100,8 +106,6 @@ class Inflator implements Runnable {
                         default:
                             break;
                     }
-
-
                 }
             });
         }
@@ -109,16 +113,15 @@ class Inflator implements Runnable {
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
+            //paints component...
             g.drawImage(image, 0,0, this);
         }
 
         @Override
         public Dimension getPreferredSize() {
+            //overrides prefered size of component (img is 32x32 px) and since our layout manager
+            //makes everything their prefered size, we override this in order to display the picture correctly
             return new Dimension(32,32);
-        }
-
-        Book getBook(){
-            return b;
         }
     }
 }

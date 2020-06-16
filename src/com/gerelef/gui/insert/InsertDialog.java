@@ -5,6 +5,7 @@ import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
+/* User picks what kind of book to add, literature or scientific */
 public class InsertDialog extends JDialog {
     private JPanel contentPane;
     private JButton btnLiterary;

@@ -8,6 +8,7 @@ import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
+/* Responsible for inserting literature books */
 public class InsertLiteraryBookDialog extends JDialog {
     private JPanel contentPane;
     private JTextField txtFldBookTitle;
@@ -24,6 +25,8 @@ public class InsertLiteraryBookDialog extends JDialog {
     private JTextField txtFldExpl4;
     private JTextField txtFldExpl5;
     private JButton btnDone;
+
+    IOLibManager libManager = IOLibManager.getInstance();
 
     public InsertLiteraryBookDialog() {
         setContentPane(contentPane);
@@ -53,11 +56,11 @@ public class InsertLiteraryBookDialog extends JDialog {
         btnDone.addActionListener(e -> {
             if (userIsDone()) {
                 new Thread(() -> {
-                    IOLibManager libManager = IOLibManager.getInstance();
+                    //normalizes greek, uppercases it, trims it
                     String title = Helper.normalizeGreek(txtFldBookTitle.getText()).toUpperCase().trim();
                     String writer = Helper.normalizeGreek(txtFldWriterName.getText()).toUpperCase().trim();
-                    long ISBN = Long.parseLong(txtFldISBN.getText());
-                    int date = Integer.parseInt(txtFldDate.getText());
+                    long ISBN = Long.parseLong(txtFldISBN.getText()); //this should be okay since we've checked it b4
+                    int date = Integer.parseInt(txtFldDate.getText()); //this should be okay since we've checked it b4
 
                     String type;
                     if (rdBtnFiction.isSelected())
@@ -80,22 +83,24 @@ public class InsertLiteraryBookDialog extends JDialog {
 
     boolean inputIsValid() {
         //do all user input validity checks here
+
+        //checks if a radiobutton is selected
         boolean rdBtnIsChecked = rdBtnFiction.isSelected() ||
                 rdBtnNarration.isSelected() ||
                 rdBtnNovel.isSelected() ||
                 rdBtnPoetry.isSelected();
-
+        // checks if the date is valid (<=4 digits allowed)
         boolean dateIsValid = txtFldDate.getText().matches("[0-9]+") && txtFldDate.getText().length() <= 4;
+        // checks if ISBN is valid (13 dig, only digits, starts with 978 or 979
         boolean ISBNIsValid = txtFldISBN.getText().length() == 13 &&
                 txtFldISBN.getText().matches("[0-9]+") &&
-                (txtFldISBN.getText().substring(0, 3).equals("978") || txtFldISBN.getText().substring(0, 3).equals("979"));
+                (txtFldISBN.getText().startsWith("978") || txtFldISBN.getText().startsWith("979"));
 
         String title = Helper.normalizeGreek(txtFldBookTitle.getText()).toUpperCase();
         boolean titleIsValid = Helper.isInEnglish(title) || Helper.isInGreek(title);
 
         String writer = Helper.normalizeGreek(txtFldWriterName.getText()).toUpperCase();
         boolean writerIsValid = Helper.isInEnglish(writer) || Helper.isInGreek(writer);
-
 
         return rdBtnIsChecked && dateIsValid && ISBNIsValid && titleIsValid && writerIsValid;
     }

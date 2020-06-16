@@ -20,8 +20,6 @@ public class SearchDialog extends JDialog {
     private JButton btnSearch;
     private JPanel pnlBookList;
 
-    private IOLibManager libManager = IOLibManager.getInstance();
-
     public SearchDialog() {
         setContentPane(contentPane);
         setModal(true);
@@ -58,10 +56,11 @@ public class SearchDialog extends JDialog {
 
     private void cleanupPanelBookList() {
         //clean up all data on panel pnlBookList
+        pnlBookList.removeAll();
     }
 
     private void inflatePanelBookList(String bookTitle, String writerName) {
-        if (bookTitle.isBlank() && writerName.isBlank())
+        if (bookTitle.isEmpty() && writerName.isEmpty())
             return;
 
         //inflate panelBookList with data from the .txt file

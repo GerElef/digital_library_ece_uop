@@ -8,6 +8,7 @@ import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
+/* Responsible for inserting scientific books */
 public class InsertScientificBookDialog extends JDialog {
     private JPanel contentPane;
     private JTextField txtFldBookTitle;
@@ -25,6 +26,8 @@ public class InsertScientificBookDialog extends JDialog {
     private JTextField txtFldExpl5;
     private JTextField txtFldExpl6;
     private JButton btnDone;
+
+    IOLibManager libManager = IOLibManager.getInstance();
 
     public InsertScientificBookDialog() {
         setContentPane(contentPane);
@@ -60,12 +63,12 @@ public class InsertScientificBookDialog extends JDialog {
         btnDone.addActionListener(e -> {
             if (userIsDone()) {
                 new Thread(() -> {
-                    IOLibManager libManager = IOLibManager.getInstance();
+                    //normalizes greek, uppercases it, trims it
                     String title = Helper.normalizeGreek(txtFldBookTitle.getText()).toUpperCase().trim();
                     String writer = Helper.normalizeGreek(txtFldWriterName.getText()).toUpperCase().trim();
-                    long ISBN = Long.parseLong(txtFldISBN.getText());
-                    int date = Integer.parseInt(txtFldDate.getText());
-                    String freetext = txtPaneFreetext.getText();
+                    long ISBN = Long.parseLong(txtFldISBN.getText()); //this should be okay since we've checked it b4
+                    int date = Integer.parseInt(txtFldDate.getText()); //this should be okay since we've checked it b4
+                    String freetext = txtPaneFreetext.getText(); //this should be okay since we've checked it b4
 
                     String type;
                     if (rdBtnBook.isSelected())
@@ -86,11 +89,14 @@ public class InsertScientificBookDialog extends JDialog {
 
     boolean inputIsValid() {
         //do all user input validity checks here
+
+        //checks if a radiobutton is selected
         boolean rdBtnIsChecked = rdBtnLogging.isSelected() ||
                 rdBtnBook.isSelected() ||
                 rdBtnMagazine.isSelected();
-
+        // checks if the date is valid (<=4 digits allowed)
         boolean dateIsValid = txtFldDate.getText().matches("[0-9]+") && txtFldDate.getText().length() <= 4;
+        // checks if ISBN is valid (13 dig, only digits, starts with 978 or 979
         boolean ISBNIsValid = txtFldISBN.getText().length() == 13 &&
                 txtFldISBN.getText().matches("[0-9]+") &&
                 (txtFldISBN.getText().startsWith("978") || txtFldISBN.getText().startsWith("979"));

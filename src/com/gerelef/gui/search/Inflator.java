@@ -8,6 +8,7 @@ import javax.swing.border.Border;
 import java.awt.*;
 import java.util.ArrayList;
 
+/* Responsible for inflating the search thingy */
 class Inflator implements Runnable {
     JPanel guipanel;
 
@@ -63,7 +64,7 @@ class Inflator implements Runnable {
             container.add(container3);
             guipanel.add(container);
         }
-
+        //this "refreshes" the ui to draw everything we've added
         guipanel.revalidate();
     }
 }

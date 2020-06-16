@@ -7,6 +7,10 @@ import com.gerelef.gui.search.SearchDialog;
 import javax.swing.*;
 import java.awt.*;
 
+/*Class that defines the introductory gui. Here, the user can select the 4 options to
+ * 1. view the library, and remove books
+ * 2. search the library, according to writer and/or book name
+ * 3. insert books into the library, which has nested UIs */
 public class IntroductionGUI extends JFrame {
     private JButton btnExitLibrary;
     private JPanel pnlRoot;
@@ -28,6 +32,8 @@ public class IntroductionGUI extends JFrame {
 
     public void addListeners() {
 
+        /* Modal exclusion type makes the user unable to click on the main gui
+        * until he is done doing on the instanciated modal. */
         //https://docs.oracle.com/javase/tutorial/uiswing/misc/modality.html
         btnViewLibrary.addActionListener(e -> {
             LibraryDialog libraryDialog = new LibraryDialog();
@@ -48,7 +54,7 @@ public class IntroductionGUI extends JFrame {
         });
 
         btnExitLibrary.addActionListener(e -> {
-            //save anything pending here, then dispose
+            //dispose closes the window and unallocates/frees all pending data
             dispose();
         });
     }

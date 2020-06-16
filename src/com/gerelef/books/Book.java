@@ -14,6 +14,8 @@ abstract public class Book {
 
     final String bookType;
 
+    private final String outputFormat;
+
     Book(String type, String title, String writer, long ISBN, int date, String bookType){
         this.type   = type;
         this.title  = title;
@@ -21,6 +23,10 @@ abstract public class Book {
         this.ISBN   = ISBN;
         this.date   = date;
         this.bookType = bookType;
+
+        /* used for quickly outputting the books without any string building strain except from the initialization
+         * of the object */
+        outputFormat = type + "\n" + title + "\n" + writer + "\n" + ISBN + "\n" + date + "\n" + bookType + "\n";
     }
 
     public String getType(){
@@ -52,6 +58,6 @@ abstract public class Book {
     }
 
     public String getOutputFormat(){
-        return type + "\n" + title + "\n" + writer + "\n" + ISBN + "\n" + date + "\n" + bookType + "\n";
+        return outputFormat;
     }
 }

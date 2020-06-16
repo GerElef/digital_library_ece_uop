@@ -25,6 +25,7 @@ public class Helper {
         return scientificFields;
     }
 
+    //normalizes all greek vowels with accented characters to lowercase with no accents
     public static String normalizeGreek(String s){
         return s.replaceAll("[Άά]", "α")
         .replaceAll("[Έέ]", "ε")
@@ -36,7 +37,7 @@ public class Helper {
     }
 
     public static String validateName(String s) throws Crawler.InvalidFormatException {
-        //add check if book title is only in greek or english without accents
+        //if the string is uppercase, in greek or english and has no accents it's all good
         if(s.toUpperCase().equals(s) && (isInGreek(s) || isInEnglish(s)) && hasNoAccents(s))
             return s;
 
@@ -61,17 +62,16 @@ public class Helper {
     }
 
     public static long convertISBN(String s) throws Crawler.InvalidFormatException {
-        if (s.length() == 13) {
-            String substr = s.substring(0, 3);
-            if ((substr.equals("978") || substr.equals("979")) && s.matches("[0-9]+"))
-                return Long.parseLong(s);
+        //if string is 13 digits long, only digits, starts with 978 or 979, it's all good
+        if (s.length() == 13 && (s.startsWith("978") || s.startsWith("979")) && s.matches("[0-9]+")) {
+            return Long.parseLong(s);
         }
         //if the string len isn't 13 or doesn't start with 978 or 979 or isn't numbers only, throw exception
         throw new Crawler.InvalidFormatException();
     }
 
     public static int convertDate(String s) throws Crawler.InvalidFormatException {
-        if (!s.isBlank() && s.matches("[0-9]+")){
+        if (!s.isEmpty() && s.matches("[0-9]+") && s.length() <= 4){
             return Integer.parseInt(s);
         }
         //if the string len isn't 4 or isn't numbers only, throw exception

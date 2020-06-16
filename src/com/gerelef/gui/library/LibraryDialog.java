@@ -6,8 +6,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 
+/* Library dialog is responsible for showing the entire stored book list to the user. */
 public class LibraryDialog extends JDialog {
-    IOLibManager libManager = IOLibManager.getInstance();
+    private IOLibManager libManager = IOLibManager.getInstance();
 
     private JPanel contentPane;
     private JButton btnRefreshList;
@@ -29,14 +30,14 @@ public class LibraryDialog extends JDialog {
         pnlBookList.setLayout(new BoxLayout(pnlBookList, BoxLayout.PAGE_AXIS));
 
         btnRefreshList.addActionListener(e -> {
-            //stop the worker if already running (add a method (?))
-            cleanupPanelBookList(); //clean up list before adding stuff again
+            //clean up the ui list
+            cleanupPanelBookList();
+            //inflate the panel book list with the books
             inflatePanelBookList();
         });
 
         pack();
 
-        //TO-DO: add confirmation message when clicking on the "x" remove icon-button
     }
 
     private void cleanupPanelBookList() {
