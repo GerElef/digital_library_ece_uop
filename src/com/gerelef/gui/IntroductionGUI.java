@@ -31,7 +31,6 @@ public class IntroductionGUI extends JFrame {
     }
 
     public void addListeners() {
-
         /* Modal exclusion type makes the user unable to click on the main gui
          * until he is done doing on the instanciated modal. */
         //https://docs.oracle.com/javase/tutorial/uiswing/misc/modality.html

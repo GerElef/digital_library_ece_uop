@@ -70,6 +70,7 @@ class Inflator implements Runnable {
             container.add(container3);
             guipanel.add(container);
         }
+
         guipanel.revalidate();
     }
 
@@ -82,7 +83,6 @@ class Inflator implements Runnable {
 
         ImagePanel(Book b, Component parent){
             try {
-                System.out.println(getClass().getResource("/images/delete_book.png"));
                 image = ImageIO.read(getClass().getResource("/images/delete_book.png"));
             }catch (IOException e) {
                 e.printStackTrace();
