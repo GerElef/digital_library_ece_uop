@@ -27,7 +27,7 @@ public class IOLibManager {
         return instance;
     }
 
-    public synchronized static ArrayList<Book> searchForBook(String title, String writer) {
+    public synchronized ArrayList<Book> searchForBook(String title, String writer) {
         if(title.isEmpty() && writer.isEmpty())
             throw new IllegalArgumentException();
 

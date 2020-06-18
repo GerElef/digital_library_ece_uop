@@ -10,6 +10,8 @@ import java.util.ArrayList;
 
 /* Responsible for inflating the search thingy */
 class Inflator implements Runnable {
+    IOLibManager libManager = IOLibManager.getInstance();
+
     JPanel guipanel;
 
     String title;
@@ -23,7 +25,7 @@ class Inflator implements Runnable {
 
     @Override
     public void run() {
-        ArrayList<Book> books = IOLibManager.searchForBook(title, writer);
+        ArrayList<Book> books = libManager.searchForBook(title, writer);
         if (books == null)
             return;
 
